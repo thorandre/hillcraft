@@ -1,0 +1,28 @@
+name = Samoca
+description = A custom theme for the San Angelico Museum of Contemporary Art
+core = 7.x
+
+; CSS
+stylesheets[all][] = assets/css/topHack.css
+stylesheets[all][] = assets/css/layout.css
+stylesheets[all][] = assets/css/skeleton.css
+stylesheets[all][] = assets/css/stylesheet.css
+
+; JS
+scripts[] = assets/js/modernizr.js
+scripts[] = assets/js/default.js
+
+; Regions
+regions[produkt] = Produkt
+regions[featured] = Featured
+regions[content] = Content
+regions[undermeny] = Undermeny
+regions[spraakmeny] = Spraakmeny
+regions[sidebar] = Sidebar
+regions[social] = Social Icons
+regions[footer] = Footer
+regions[nyheter] = Nyheter
+regions[help] = Help
+regions[page_top] = Page Top
+regions[page_bottom] = Page Bottom
+regions[contact] = Contact

@@ -1,0 +1,6 @@
+name = mymodule
+description = Borgars ajax modul
+package = My modules
+core = 7.x
+ 
+files[] = mymodule.module

@@ -1,0 +1,367 @@
+<?php
+
+/**
+ * @file
+ * Provides an field formatter for the carouFredSel jQuery slider,
+ * more information on http://caroufredsel.dev7studios.com
+ */
+
+/**
+ * Implements hook_field_formatter_info().
+ *
+ * Returns settings for the field formatter.
+ * ['settings']['formatter'] contains internal settings for the formatter.
+ * ['settings']['config'] mirrors the config from the js library.
+ */
+function caroufredsel_slider_field_formatter_info() {
+  return array(
+    'caroufredsel_slider' => array(
+      'label' => t('carouFredSel Slider'),
+      'field types' => array('image'),
+      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+      'settings' => array(
+        'formatter' => array(
+          'image_style' => 'medium',
+        ),
+        'config' => array(
+          'circular' => TRUE,
+          'infinite' => TRUE,
+          'responsive' => FALSE,
+          'direction' => 'left',
+          'width' => 'variable',
+          'height' => 'variable',
+          'cookie' => FALSE,
+          'items' => array(
+            'visible' => 'variable',
+            'minimum' => 'null',
+          ),
+          'scroll' => array(
+            'fx' => 'scroll',
+            'easing' => 'swing',
+            'duration' => 500,
+            'pauseOnHover' => FALSE,
+          ),
+          'auto' => TRUE,
+          'swipe' => FALSE,
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function caroufredsel_slider_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $element = array();
+  $settings = $instance['display'][$view_mode]['settings'];
+
+  // Formatter specific settings.
+  $element['formatter'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Display settings'),
+  );
+  $element['formatter']['image_style'] = array(
+    '#type' => 'select',
+    '#title' => t('Image style'),
+    '#description' => t('Image style to display the images.'),
+    '#default_value' => $settings['formatter']['image_style'],
+    '#options' => image_style_options(FALSE),
+  );
+
+  // JS specific settings, matching the options from
+  // http://caroufredsel.dev7studios.com/configuration.php.
+  $element['config'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Widget configuration'),
+  );
+  $element['config']['circular'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Circular'),
+    '#description' => t('Determines whether the carousel should be circular.'),
+    '#default_value' => $settings['config']['circular'],
+  );
+  $element['config']['infinite'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Infinite'),
+    '#description' => t('Determines whether the carousel should be infinite.'),
+    '#default_value' => $settings['config']['infinite'],
+  );
+  $element['config']['responsive'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Responsive'),
+    '#description' => t('Determines whether the carousel should be responsive. If enabled, the items will be resized to fill the carousel.'),
+    '#default_value' => $settings['config']['responsive'],
+  );
+  $element['config']['direction'] = array(
+    '#type' => 'select',
+    '#title' => t('Direction'),
+    '#description' => t('The direction to scroll the carousel, determines whether the carousel scrolls horizontal or vertical and -when the carousel scrolls automatically- in what direction.'),
+    '#default_value' => $settings['config']['direction'],
+    '#options' => array(
+      'right' => t('Right'),
+      'left' => t('Left'),
+      'up' => t('Up'),
+      'down' => t('Down'),
+    ),
+  );
+  $element['config']['width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Width'),
+    '#description' => t('Enter "variable" to automatically resize the carousel when scrolling items with variable widths, "auto" to measure the widest item, a fixed value like "100px", or a relative value like "50%".'),
+    '#default_value' => $settings['config']['width'],
+    '#size' => 10,
+  );
+  $element['config']['height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Height'),
+    '#description' => t('Enter "variable" to automatically resize the carousel when scrolling items with variable heights, "auto" to measure the highest item, a fixed value like "100px", or a relative value like "50%".'),
+    '#default_value' => $settings['config']['height'],
+    '#size' => 10,
+  );
+  $element['config']['cookie'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Cookie'),
+    '#description' => t('Determines whether the carousel should start at its last viewed position.'),
+    '#default_value' => $settings['config']['cookie'],
+  );
+  $element['config']['items'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Items'),
+  );
+  $element['config']['items']['visible'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Visible'),
+    '#description' => t('The number of visible items.'),
+    '#default_value' => $settings['config']['items']['visible'],
+  );
+  $element['config']['items']['minimum'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Minimum'),
+    '#description' => t('The minimum number of items needed to create a carousel.'),
+    '#default_value' => $settings['config']['items']['minimum'],
+  );
+  $element['config']['scroll'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Scroll'),
+  );
+  $element['config']['scroll']['fx'] = array(
+    '#type' => 'select',
+    '#title' => t('Fx'),
+    '#description' => t('Indicates which effect to use for the transition.'),
+    '#default_value' => $settings['config']['scroll']['fx'],
+    '#options' => array(
+      'none' => t('None'),
+      'scroll' => t('Scroll'),
+      'directscroll' => t('Directscroll'),
+      'fade' => t('Fade'),
+      'crossfade' => t('Crossfade'),
+      'cover' => t('Cover'),
+      'cover-fade' => t('Cover-fade'),
+      'uncover' => t('Uncover'),
+      'uncover-fade' => t('Uncover-fade'),
+    ),
+  );
+  $element['config']['scroll']['easing'] = array(
+    '#type' => 'select',
+    '#title' => t('Easing'),
+    '#description' => t('Indicates which easing function to use for the transition.'),
+    '#default_value' => $settings['config']['scroll']['easing'],
+    '#options' => array(
+      'linear' => t('Linear'),
+      'swing' => t('Swing'),
+      'quadratic' => t('Quadratic'),
+      'cubic' => t('Cubic'),
+      'elastic' => t('Elastic'),
+    ),
+  );
+  $element['config']['scroll']['duration'] = array(
+    '#type' => 'select',
+    '#title' => t('Duration'),
+    '#description' => t('Determines the duration of the transition in milliseconds.'),
+    '#default_value' => $settings['config']['scroll']['duration'],
+    '#options' => array(
+      100  => '100',
+      300 => '300',
+      500  => '500',
+      800  => '800',
+      1000  => '1000',
+    ),
+  );
+  $element['config']['scroll']['pauseOnHover'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Pause on hover'),
+    '#description' => t('Determines whether the timeout between transitions should be paused.'),
+    '#default_value' => $settings['config']['scroll']['pauseOnHover'],
+  );
+  $element['config']['auto'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Auto'),
+    '#description' => t('Determines whether the carousel should scroll automatically or not.'),
+    '#default_value' => $settings['config']['auto'],
+  );
+  $element['config']['swipe'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Swipe'),
+    '#description' => t('Determines whether the carousel should scroll via swiping gestures (on touch-devices only).'),
+    '#default_value' => $settings['config']['swipe'],
+  );
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function caroufredsel_slider_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $settings = $instance['display'][$view_mode]['settings'];
+
+  // Render summary for the formatter, including image style and basic settings.
+  $summary = t('Image style: @image_style, Circular: @circular, Infinite: @infinite, Responsive: @responsive, Direction: @direction', array(
+    '@image_style' => $settings['formatter']['image_style'],
+    '@circular' => $settings['config']['circular'],
+    '@infinite' => $settings['config']['infinite'],
+    '@responsive' => $settings['config']['responsive'],
+    '@direction' => $settings['config']['direction'],
+  ));
+
+  return $summary;
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function caroufredsel_slider_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $settings = $display['settings'];
+
+  $settings['config'] = caroufredsel_slider_settings_convert_values($settings['config']);
+
+  // Load carouFredSel js library.
+  $library = libraries_load('caroufredsel');
+  libraries_load_files($library);
+
+  // Add the JavaScript file containing the Drupal.behavior.
+  $element['#attached']['js'][] = drupal_get_path('module', 'caroufredsel_slider') . '/caroufredsel_slider.js';
+
+  if ($settings['config']['swipe']) {
+    // Swipe is enabled by config, so include additional js.
+    $element['#attached']['js'][] = $library['library path'] . '/helper-plugins/jquery.touchSwipe.min.js';
+  }
+  else {
+    // Swipe is disabled, so remove value from config.
+    unset($settings['config']['swipe']);
+  }
+
+  // Create unique identifier to apply js settings only for this element.
+  $html_id = drupal_html_id('caroufredsel_slider');
+
+  // Add the js configuration for the current slider.
+  $element['#attached']['js'][] = array(
+    'data' => array(
+      'caroufredsel_slider' => array(
+        $html_id => $settings['config'],
+      ),
+    ),
+    'type' => 'setting',
+  );
+
+  // Collect output of each item, render image with given image style.
+  $slider_elements = '';
+  foreach ($items as $delta => $item) {
+    $image = theme('image_style', array('style_name' => $settings['formatter']['image_style'], 'path' => $item['uri']));
+    $slider_elements .= theme('caroufredsel_slider_item', array('image' => $image));
+  }
+
+  // Attributes for the themed element.
+  $attributes = array(
+    'id' => $html_id,
+    'class' => 'caroufredsel_slider',
+  );
+
+  // Return a themed item list with the pepared images inside.
+  $element[0]['#markup'] = theme('caroufredsel_slider', array('items' => $slider_elements, 'attributes_array' => $attributes));
+
+  return $element;
+}
+
+/**
+ * Convert setting values to valid values for the js library.
+ * 
+ * Converts 1/0 to TRUE/FALSE.
+ * Converts 'null' to NULL.
+ */
+function caroufredsel_slider_settings_convert_values($settings) {
+  foreach ($settings as $key => $value) {
+    if ($value === 1) {
+      $settings[$key] = TRUE;
+    }
+    elseif ($value === 0) {
+      $settings[$key] = FALSE;
+    }
+    elseif ($value === 'null') {
+      $settings[$key] = NULL;
+    }
+    elseif (is_array($value)) {
+      foreach ($value as $sub_key => $sub_value) {
+        if (is_numeric($sub_value)) {
+          $settings[$key][$sub_key] = intval($sub_value);
+        }
+      }
+    }
+  }
+
+  return $settings;
+}
+
+/**
+ * Implements hook_libraries_info().
+ */
+function caroufredsel_slider_libraries_info() {
+  $libraries['caroufredsel'] = array(
+    'name' => 'carouFredSel jQuery plugin',
+    'vendor url' => 'http://caroufredsel.dev7studios.com',
+    'download url' => 'http://caroufredsel.dev7studios.com/download.php',
+    'version arguments' => array(
+      'file' => 'index.html',
+      'pattern' => '/jquery.carouFredSel-([0-9\.]*)-packed.js/',
+    ),
+    'callbacks' => array(
+      'post-detect' => array(
+        'caroufredsel_slider_libraries_postload_callback',
+      ),
+    ),
+  );
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function caroufredsel_slider_theme($existing, $type, $theme, $path) {
+  return array(
+    'caroufredsel_slider' => array(
+      'template' => 'caroufredsel-slider',
+      'variables' => array(
+        'element_id' => NULL,
+        'items' => NULL,
+      ),
+    ),
+    'caroufredsel_slider_item' => array(
+      'template' => 'caroufredsel-slider-item',
+      'variables' => array(
+        'image' => NULL,
+      ),
+    ),
+  );
+}
+
+/**
+ * Callback for libraries post-detect in caroufredsel_slider_libraries_info().
+ * 
+ * Sets the libraries filename based on version string from downloaded package.
+ */
+function caroufredsel_slider_libraries_postload_callback(&$library, $version, $variant) {
+  $library['files']['js'][] = 'jquery.carouFredSel-' . $library['version'] . '.js';
+}
