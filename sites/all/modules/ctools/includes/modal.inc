@@ -187,7 +187,7 @@ function ctools_modal_text_button($text, $dest, $alt, $class = '') {
 /**
  * Wrap a form so that we can use it properly with AJAX. Essentially if the
  * form wishes to render, it automatically does that, otherwise it returns
- * so we can see submission results.
+ * the render array so we can see submission results.
 
  * @param array $form
  *   An associative array containing the structure of the form.
